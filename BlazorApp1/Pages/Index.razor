@@ -1,0 +1,58 @@
+﻿@page "/{id}"
+
+@using BlazorApp1.Data
+
+@inject NavigationManager NavigationManager
+@inject OrderService OrderService
+
+
+@if (this.Order == null)
+{
+    <p>Loading...</p>
+    return;
+}
+
+<h1>Hello, @this.Order.CustomerName!</h1>
+
+<p>
+    Thanks so much for your order!
+</p>
+
+@if (this.Order.HasArrived)
+{
+    <p>You checked in at <strong>@this.Order.ArrivedAt</strong>, there is nothing more you need to do! We are working as fast as we can to get your order to you. See you soon!</p>
+}
+else
+{
+    <p>At the store? Go ahead and let us know by clicking the "I am here" button and we will be out shortly!</p>
+}
+
+<button class="btn btn-primary" @onclick="OnButton1Clicked">I am here</button>
+<button class="btn btn-link" @onclick="OnButton2Clicked">I am not here</button>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    public Order Order { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.Order =
+            await this.OrderService.GetByIdAsync(this.Id);
+    }
+
+    private async Task OnButton1Clicked(
+        MouseEventArgs e)
+    {
+        this.Order =
+            await this.OrderService.UpdateHasArrivedByIdAsync(this.Id, true);
+    }
+
+    private async Task OnButton2Clicked(
+        MouseEventArgs e)
+    {
+        this.Order =
+            await this.OrderService.UpdateHasArrivedByIdAsync(this.Id, false);
+    }
+}
