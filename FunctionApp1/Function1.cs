@@ -10,13 +10,13 @@ namespace FunctionApp1
     {
         [FunctionName(nameof(Function1))]
         public static IActionResult Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "orders/{id}")] HttpRequest req,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "customers/{customerPhoneNumber}/orders/{id}")] HttpRequest req,
             [CosmosDB(
                 databaseName: "%COSMOSDB_DATABASEID%",
-                collectionName: "orders",
+                collectionName: "customers",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING",
                 Id = "{id}",
-                PartitionKey = "{id}")] Function1Data function1Data,
+                PartitionKey = "{customerPhoneNumber}")] Function1Data function1Data,
             ILogger logger)
         {
             logger.LogInformation($"{nameof(Function1)} function processed a request.");
@@ -27,12 +27,8 @@ namespace FunctionApp1
             }
 
             var function1Response =
-                new Function1Response
-                {
-                    OrderId = function1Data.OrderId,
-                    CustomerName = function1Data.CustomerName,
-                    ArrivedAt = function1Data.ArrivedAt
-                };
+                new Function1Response(
+                    function1Data);
 
             return new OkObjectResult(function1Response);
         }

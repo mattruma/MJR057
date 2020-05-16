@@ -16,7 +16,6 @@ namespace FunctionApp1
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING",
-                StartFromBeginning = true,
                 CreateLeaseCollectionIfNotExists = true,
                 LeaseCollectionName = "leases")]IReadOnlyList<Document> documentList,
             [CosmosDB(
@@ -54,6 +53,7 @@ namespace FunctionApp1
                 createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtDate}}", function3Data.ReadyAt.ToShortDateString());
                 createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtTime}}", function3Data.ReadyAt.ToShortTimeString());
                 createMessageOptions.Body = createMessageOptions.Body.Replace("{{Uri}}", Environment.GetEnvironmentVariable("FUNCTION3_URI"));
+                createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", function3Data.Id);
                 createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", function3Data.OrderId);
 
                 createMessageOptionsCollector.Add(createMessageOptions);
