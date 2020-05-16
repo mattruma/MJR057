@@ -1,28 +1,77 @@
+using FunctionApp2.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
+using Microsoft.Azure.Cosmos.Linq;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace FunctionApp2
 {
-    public static class Function3
+    public class Function3
     {
+        private readonly CosmosClient _cosmosClient;
+
+        public Function3(
+            CosmosClient cosmosClient)
+        {
+            _cosmosClient = cosmosClient;
+        }
+
         [FunctionName(nameof(Function3))]
-        public static IActionResult Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "locations/{locationId}/orders")] HttpRequest httpRequest,
-            [CosmosDB(
-                databaseName: "%COSMOSDB_DATABASEID%",
-                collectionName: "orders",
-                ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING",
-                SqlQuery = "SELECT * FROM c WHERE c.locationId = {locationId}")]
-                IEnumerable<Function3Data> function3DataList,
+            string locationId,
             ILogger logger)
         {
             logger.LogInformation($"{nameof(Function3)} function processed a request.");
 
-            return new OkObjectResult(function3DataList);
+            var paginationOptions =
+                new PaginationOptions(
+                    httpRequest);
+
+            var cosmosContainer =
+                _cosmosClient.GetContainer(
+                    Environment.GetEnvironmentVariable("COSMOSDB_DATABASEID"),
+                    "orders");
+
+            var itemQueryable = cosmosContainer
+                .GetItemLinqQueryable<Function3Data>();
+
+            IQueryable<Function3Data> query = itemQueryable
+                .Where(x => x.LocationId == locationId)
+                .OrderByDescending(x => x.CreatedOn);
+
+            query = query
+                .Skip((paginationOptions.Page - 1) * paginationOptions.PageSize)
+                .Take(paginationOptions.PageSize + 1);
+
+            var feedIterator =
+                query.ToFeedIterator();
+
+            var function3DataList =
+                new List<Function3Data>();
+
+            while (feedIterator.HasMoreResults)
+            {
+                var feedResponse =
+                    await feedIterator.ReadNextAsync();
+
+                function3DataList.AddRange(
+                    feedResponse.Resource);
+            }
+
+            var function3Response =
+                new Function3Response(
+                    paginationOptions,
+                    function3DataList);
+
+            return new OkObjectResult(function3Response);
         }
     }
 }

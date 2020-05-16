@@ -41,14 +41,19 @@ namespace FunctionApp1
             {
                 function2Data.ArrivedAt = DateTime.UtcNow;
 
-                createMessageOptions.Body = $"Hi {function2Data.CustomerName}, looks like you arrived safely! One of our team members will be right out with your order. If you are not here, you can update your status https://mylink.com!";
+                createMessageOptions.Body = Environment.GetEnvironmentVariable("FUNCTION2_TEMPLATE_ARRIVED");
             }
             else
             {
                 function2Data.ArrivedAt = null;
 
-                createMessageOptions.Body = $"Hi {function2Data.CustomerName}, drive safely! Let us know when you are here at https://mylink.com!";
+                createMessageOptions.Body = Environment.GetEnvironmentVariable("FUNCTION2_TEMPLATE_NOTARRIVED");
             }
+
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", function2Data.CustomerName);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", function2Data.CustomerPhoneNumber);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", function2Data.Id);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Uri}}", Environment.GetEnvironmentVariable("FUNCTION2_URI"));
 
             await function3DataCollector.AddAsync(function2Data);
 

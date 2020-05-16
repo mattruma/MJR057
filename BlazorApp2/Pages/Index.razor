@@ -1,0 +1,44 @@
+﻿@page "/"
+
+@using BlazorApp2.Data
+
+@inject NavigationManager NavigationManager
+@inject LocationService LocationService
+
+<h1>Locations</h1>
+
+<p>Select a location to see orders.</p>
+
+@if (this.IsBusy)
+{
+    <p>Loading...</p>
+    return;
+}
+<table class="table">
+    <tbody>
+        @foreach (var location in this.Locations)
+        {
+            <tr>
+                <td class="col-0"><a href="locations/@location.LocationId/orders" class="btn btn-outline-primary">Select</a></td>
+                <td>@location.Name</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+
+    public bool IsBusy { get; set; }
+
+    public IEnumerable<Location> Locations { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        this.IsBusy = true;
+
+        this.Locations =
+            await this.LocationService.ListAsync();
+
+        this.IsBusy = false;
+    }
+}

@@ -28,5 +28,8 @@ namespace FunctionApp2
 
         [JsonProperty("deliveredAt")]
         public DateTime? DeliveredAt { get; set; }
+
+        [JsonProperty("createdOn")]
+        public DateTime CreatedOn { get; set; }
     }
 }

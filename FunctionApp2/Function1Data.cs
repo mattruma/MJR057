@@ -22,5 +22,13 @@ namespace FunctionApp2
 
         [JsonProperty("readyAt")]
         public DateTime ReadyAt { get; set; }
+
+        [JsonProperty("createdOn")]
+        public DateTime CreatedOn { get; set; }
+
+        public Function1Data()
+        {
+            this.CreatedOn = DateTime.UtcNow;
+        }
     }
 }

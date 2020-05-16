@@ -13,7 +13,7 @@ namespace FunctionApp2
     {
         [FunctionName(nameof(Function2))]
         public static async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "orders/{id}")] Function2Request function4Request,
+            [HttpTrigger(AuthorizationLevel.Function, "put", Route = "orders/{id}")] Function2Request function2Request,
             [CosmosDB(
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
@@ -24,7 +24,7 @@ namespace FunctionApp2
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")]
-                IAsyncCollector<Function2Data> function4DataCollector,
+                IAsyncCollector<Function2Data> function2DataCollector,
             [TwilioSms(
                 AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
                 AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
@@ -37,7 +37,7 @@ namespace FunctionApp2
                 new CreateMessageOptions(
                         new PhoneNumber(function2Data.CustomerPhoneNumber));
 
-            if (function4Request.HasDelivered)
+            if (function2Request.HasDelivered)
             {
                 function2Data.DeliveredAt = DateTime.UtcNow;
 
@@ -48,9 +48,9 @@ namespace FunctionApp2
                 function2Data.DeliveredAt = null;
             }
 
-            await function4DataCollector.AddAsync(function2Data);
+            await function2DataCollector.AddAsync(function2Data);
 
-            if (function4Request.HasDelivered)
+            if (function2Request.HasDelivered)
             {
                 await createMessageOptionsCollector.AddAsync(createMessageOptions);
             }
