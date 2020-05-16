@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
+using System;
 using System.Threading.Tasks;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
@@ -29,7 +30,8 @@ namespace FunctionApp2
                 new Function1Data
                 {
                     Id = function1Request.OrderId,
-                    OrderId = function1Request.OrderId,
+                    Date = function1Request.Date,
+                    OrderId = $"{function1Request.LocationId}{function1Request.Date:yyyyMMdd}",
                     CustomerName = function1Request.CustomerName,
                     CustomerPhoneNumber = function1Request.CustomerPhoneNumber,
                     LocationId = function1Request.LocationId,
@@ -40,10 +42,16 @@ namespace FunctionApp2
 
             var createMessageOptions =
                 new CreateMessageOptions(
-                    new PhoneNumber(function1Request.CustomerPhoneNumber))
-                {
-                    Body = $"Hi {function1Request.CustomerName}, thanks for your order! Your order should be ready on {function1Request.ReadyAt.ToShortDateString()} at {function1Request.ReadyAt.ToShortTimeString()}. Please click the following link when you arrive https://mylink.com and let us know you are here!"
-                };
+                    new PhoneNumber(function1Data.CustomerPhoneNumber));
+
+            createMessageOptions.Body = Environment.GetEnvironmentVariable("FUNCTION1_TEMPLATE");
+
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", function1Data.CustomerName);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", function1Data.CustomerPhoneNumber);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtDate}}", function1Data.ReadyAt.ToShortDateString());
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtTime}}", function1Data.ReadyAt.ToShortTimeString());
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", function1Data.Id);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Uri}}", Environment.GetEnvironmentVariable("FUNCTION1_URI"));
 
             await createMessageOptionsCollector.AddAsync(createMessageOptions);
 

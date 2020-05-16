@@ -11,6 +11,9 @@ namespace FunctionApp2
         [JsonProperty("orderId")]
         public string OrderId { get; set; }
 
+        [JsonProperty("date")]
+        public DateTime Date { get; set; }
+
         [JsonProperty("customerName")]
         public string CustomerName { get; set; }
 

@@ -25,8 +25,9 @@ namespace FunctionApp2
 
         [FunctionName(nameof(Function3))]
         public async Task<IActionResult> Run(
-            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "locations/{locationId}/orders")] HttpRequest httpRequest,
+            [HttpTrigger(AuthorizationLevel.Function, "get", Route = "locations/{locationId}/orders/{date}")] HttpRequest httpRequest,
             string locationId,
+            string date,
             ILogger logger)
         {
             logger.LogInformation($"{nameof(Function3)} function processed a request.");
@@ -44,7 +45,7 @@ namespace FunctionApp2
                 .GetItemLinqQueryable<Function3Data>();
 
             IQueryable<Function3Data> query = itemQueryable
-                .Where(x => x.LocationId == locationId)
+                .Where(x => x.OrderId == $"{locationId}{Convert.ToDateTime(date):yyyyMMdd}")
                 .OrderByDescending(x => x.CreatedOn);
 
             query = query
