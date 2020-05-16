@@ -25,10 +25,6 @@ namespace FunctionApp1
                 collectionName: "customers",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")]
                 IAsyncCollector<Function2Data> function3DataCollector,
-            [TwilioSms(
-                AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
-                AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
-                From = "%TWILIO_FROM%")] IAsyncCollector<CreateMessageOptions> createMessageOptionsCollector,
             ILogger logger)
         {
             logger.LogInformation($"{nameof(Function2)} function processed a request.");
@@ -40,25 +36,13 @@ namespace FunctionApp1
             if (function3Request.HasArrived)
             {
                 function2Data.ArrivedAt = DateTime.UtcNow;
-
-                createMessageOptions.Body = Environment.GetEnvironmentVariable("FUNCTION2_TEMPLATE_1");
             }
             else
             {
                 function2Data.ArrivedAt = null;
-
-                createMessageOptions.Body = Environment.GetEnvironmentVariable("FUNCTION2_TEMPLATE_2");
             }
 
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", function2Data.CustomerName);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", function2Data.CustomerPhoneNumber);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Uri}}", Environment.GetEnvironmentVariable("FUNCTION2_URI"));
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", function2Data.Id);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", function2Data.OrderId);
-
             await function3DataCollector.AddAsync(function2Data);
-
-            await createMessageOptionsCollector.AddAsync(createMessageOptions);
 
             var function2Response =
                 new Function2Response(
