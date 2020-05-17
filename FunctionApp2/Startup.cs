@@ -1,4 +1,5 @@
-﻿using Microsoft.Azure.Cosmos.Fluent;
+﻿using FunctionApp2.Helpers;
+using Microsoft.Azure.Cosmos.Fluent;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -23,6 +24,9 @@ namespace FunctionApp2
                     .WithConnectionModeDirect()
                     .Build();
             });
+
+            services.AddSingleton(
+                new OrderIdBuilder());
         }
     }
 }

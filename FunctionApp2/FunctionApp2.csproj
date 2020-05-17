@@ -7,12 +7,6 @@
     <Compile Remove="Function2.cs" />
     <Compile Remove="Function2Data.cs" />
     <Compile Remove="Function2Request.cs" />
-    <Compile Remove="Function3.cs" />
-    <Compile Remove="Function3Data.cs" />
-    <Compile Remove="Function3Response.cs" />
-    <Compile Remove="Function4.cs" />
-    <Compile Remove="Function4Data.cs" />
-    <Compile Remove="Function4Response.cs" />
     <Compile Remove="Function5.cs" />
     <Compile Remove="Function5Data.cs" />
     <Compile Remove="Function5Request.cs" />

@@ -13,63 +13,62 @@ using System.Threading.Tasks;
 
 namespace FunctionApp2
 {
-    public class Function4
+    public class LocationList
     {
         private readonly CosmosClient _cosmosClient;
 
-        public Function4(
+        public LocationList(
             CosmosClient cosmosClient)
         {
             _cosmosClient = cosmosClient;
         }
 
-        [FunctionName(nameof(Function4))]
+        [FunctionName(nameof(LocationList))]
         public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "get", Route = "locations")] HttpRequest httpRequest,
             ILogger logger)
         {
-            logger.LogInformation($"{nameof(Function4)} function processed a request.");
+            logger.LogInformation($"{nameof(LocationList)} function processed a request.");
 
             var paginationOptions =
                 new PaginationOptions(
                     httpRequest);
 
-            var cosmosContainer =
+            var locationCosmosContainer =
                 _cosmosClient.GetContainer(
                     Environment.GetEnvironmentVariable("COSMOSDB_DATABASEID"),
                     "locations");
 
-            var itemQueryable = cosmosContainer
-                .GetItemLinqQueryable<Function4Data>();
+            IQueryable<LocationListData> locationQuery =
+                locationCosmosContainer
+                    .GetItemLinqQueryable<LocationListData>()
+                    .OrderBy(x => x.Name);
 
-            IQueryable<Function4Data> query = itemQueryable
-                .OrderBy(x => x.Name);
-
-            query = query
+            locationQuery = locationQuery
                 .Skip((paginationOptions.Page - 1) * paginationOptions.PageSize)
                 .Take(paginationOptions.PageSize + 1);
 
-            var feedIterator =
-                query.ToFeedIterator();
+            var locationFeedIterator =
+                locationQuery.ToFeedIterator();
 
-            var function4DataList =
-                new List<Function4Data>();
+            var locationListDataList =
+                new List<LocationListData>();
 
-            while (feedIterator.HasMoreResults)
+            while (locationFeedIterator.HasMoreResults)
             {
-                var feedResponse =
-                    await feedIterator.ReadNextAsync();
+                var locationFeedResponse =
+                    await locationFeedIterator.ReadNextAsync();
 
-                function4DataList.AddRange(
-                    feedResponse.Resource);
+                locationListDataList.AddRange(
+                    locationFeedResponse.Resource);
             }
 
-            var function4Response =
-                new Function4Response(
+            var locationListResponse =
+                new LocationListResponse(
                     paginationOptions,
-                    function4DataList);
+                    locationListDataList);
 
-            return new OkObjectResult(function4Response);
+            return new OkObjectResult(locationListResponse);
         }
     }
 }

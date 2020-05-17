@@ -1,19 +1,27 @@
+using FunctionApp2.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Twilio.Rest.Api.V2010.Account;
 using Twilio.Types;
 
 namespace FunctionApp2
 {
-    public static class OrderReceived
+    public class OrderReceived
     {
+        private readonly OrderIdBuilder _orderIdBuilder;
+
+        public OrderReceived(
+            OrderIdBuilder orderIdBuilder)
+        {
+            _orderIdBuilder = orderIdBuilder;
+        }
+
         [FunctionName(nameof(OrderReceived))]
-        public static async Task<IActionResult> Run(
+        public async Task<IActionResult> Run(
             [HttpTrigger(AuthorizationLevel.Function, "post", Route = "orders")] OrderReceivedRequest orderReceivedRequest,
             [CosmosDB(
                 databaseName: "%COSMOSDB_DATABASEID%",
@@ -27,26 +35,22 @@ namespace FunctionApp2
         {
             logger.LogInformation($"{nameof(OrderReceived)} function processed a request.");
 
-            Regex regex;
-
-            regex = new Regex("[^0-9]");
-
-            orderReceivedRequest.CustomerPhoneNumber = regex.Replace(orderReceivedRequest.CustomerPhoneNumber, "");
-
-            regex = new Regex("[^a-zA-Z0-9]");
-
-            orderReceivedRequest.OrderId = regex.Replace(orderReceivedRequest.OrderId, "").ToUpper();
+            var orderIdBuilderResponse =
+                _orderIdBuilder.Build(
+                    orderReceivedRequest.OrderId,
+                    orderReceivedRequest.LocationId,
+                    orderReceivedRequest.Date);
 
             var orderReceivedData =
                 new OrderReceivedData
                 {
-                    Id = $"{orderReceivedRequest.LocationId}-{orderReceivedRequest.Date:yyyyMMdd}-{orderReceivedRequest.OrderId}",
+                    Id = orderIdBuilderResponse.Id,
                     Date = orderReceivedRequest.Date,
                     OrderId = orderReceivedRequest.OrderId,
                     CustomerName = orderReceivedRequest.CustomerName,
-                    CustomerPhoneNumber = orderReceivedRequest.CustomerPhoneNumber,
+                    CustomerPhoneNumber = orderReceivedRequest.CustomerPhoneNumber.Sanitize("[^0-9]"),
                     LocationId = orderReceivedRequest.LocationId,
-                    LocationIdAndDate = $"{orderReceivedRequest.LocationId}-{orderReceivedRequest.Date:yyyyMMdd}",
+                    LocationIdAndDate = orderIdBuilderResponse.LocationIdAndDate,
                     ReadyAt = orderReceivedRequest.ReadyAt
                 };
 
