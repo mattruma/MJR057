@@ -4,13 +4,6 @@
     <AzureFunctionsVersion>v3</AzureFunctionsVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="Function1.cs" />
-    <Compile Remove="Function1Data.cs" />
-    <Compile Remove="Function1Response.cs" />
-    <Compile Remove="Function2.cs" />
-    <Compile Remove="Function2Data.cs" />
-    <Compile Remove="Function2Request.cs" />
-    <Compile Remove="Function2Response.cs" />
     <Compile Remove="Function3.cs" />
     <Compile Remove="Function3Data.cs" />
     <Compile Remove="Function3Request.cs" />
@@ -20,6 +13,8 @@
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.Twilio" Version="3.0.0" />
     <PackageReference Include="Microsoft.NET.Sdk.Functions" Version="3.0.3" />
     <PackageReference Include="Microsoft.Azure.Functions.Extensions" Version="1.0.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos" Version="3.8.0" />
+    <PackageReference Include="Microsoft.Azure.Cosmos.Table" Version="1.0.7" />
   </ItemGroup>
   <ItemGroup>
     <None Update="host.json">

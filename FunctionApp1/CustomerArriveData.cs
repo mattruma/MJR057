@@ -3,13 +3,16 @@ using System;
 
 namespace FunctionApp1
 {
-    public class Function2Data
+    public class CustomerArriveData
     {
         [JsonProperty("id")]
         public string Id { get; set; }
 
         [JsonProperty("orderId")]
         public string OrderId { get; set; }
+
+        [JsonProperty("date")]
+        public DateTime Date { get; set; }
 
         [JsonProperty("customerName")]
         public string CustomerName { get; set; }
@@ -20,10 +23,16 @@ namespace FunctionApp1
         [JsonProperty("locationId")]
         public string LocationId { get; set; }
 
+        [JsonProperty("locationIdAndDate")]
+        public string LocationIdAndDate { get; set; }
+
         [JsonProperty("readyAt")]
         public DateTime ReadyAt { get; set; }
 
         [JsonProperty("arrivedAt")]
         public DateTime? ArrivedAt { get; set; }
+
+        [JsonProperty("createdOn")]
+        public DateTime CreatedOn { get; set; }
     }
 }
