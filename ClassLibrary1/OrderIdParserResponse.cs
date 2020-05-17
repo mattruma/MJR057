@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FunctionApp1.Helpers
+namespace ClassLibrary1
 {
     public class OrderIdParserResponse
     {

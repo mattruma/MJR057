@@ -3,7 +3,7 @@ using System;
 
 namespace FunctionApp2
 {
-    public class OrderReceivedData
+    public class OrderDeliverData
     {
         [JsonProperty("id")]
         public string Id { get; set; }
@@ -29,12 +29,13 @@ namespace FunctionApp2
         [JsonProperty("readyAt")]
         public DateTime ReadyAt { get; set; }
 
+        [JsonProperty("arrivedAt")]
+        public DateTime? ArrivedAt { get; set; }
+
+        [JsonProperty("deliveredAt")]
+        public DateTime? DeliveredAt { get; set; }
+
         [JsonProperty("createdOn")]
         public DateTime CreatedOn { get; set; }
-
-        public OrderReceivedData()
-        {
-            this.CreatedOn = DateTime.UtcNow;
-        }
     }
 }

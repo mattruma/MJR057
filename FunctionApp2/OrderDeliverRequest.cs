@@ -1,6 +1,6 @@
 ﻿namespace FunctionApp2
 {
-    public class Function2Request
+    public class OrderDeliverRequest
     {
         public bool HasDelivered { get; set; }
     }

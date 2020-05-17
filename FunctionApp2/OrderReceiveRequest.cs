@@ -2,7 +2,7 @@
 
 namespace FunctionApp2
 {
-    public class OrderReceivedRequest
+    public class OrderReceiveRequest
     {
         public string OrderId { get; set; }
 

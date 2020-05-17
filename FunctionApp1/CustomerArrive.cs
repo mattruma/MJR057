@@ -1,4 +1,4 @@
-using FunctionApp1.Helpers;
+using ClassLibrary1;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
 using Microsoft.Azure.WebJobs;
@@ -33,11 +33,11 @@ namespace FunctionApp1
                 collectionName: "orders",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")]
                 IAsyncCollector<CustomerArriveData> customerArriveDataCollector,
-            ILogger logger,
             [TwilioSms(
                 AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
                 AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
-                From = "%TWILIO_FROM%")] ICollector<CreateMessageOptions> createMessageOptionsCollector)
+                From = "%TWILIO_FROM%")] IAsyncCollector<CreateMessageOptions> createMessageOptionsCollector,
+            ILogger logger)
         {
             logger.LogInformation($"{nameof(CustomerArrive)} function processed a request.");
 
@@ -83,7 +83,7 @@ namespace FunctionApp1
             createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", customerArriveData.Id);
             createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", customerArriveData.OrderId);
 
-            createMessageOptionsCollector.Add(createMessageOptions);
+            await createMessageOptionsCollector.AddAsync(createMessageOptions);
 
             var customerArriveResponse =
                 new CustomerArriveResponse(

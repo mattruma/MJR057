@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace FunctionApp2.Helpers
+namespace ClassLibrary1
 {
     public class OrderIdBuilderResponse
     {
