@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace ClassLibrary1
+namespace ClassLibrary1.Helpers
 {
     public class PaginationOptions
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 
-namespace ClassLibrary1
+namespace ClassLibrary1.Helpers
 {
     public class OrderIdBuilder
     {

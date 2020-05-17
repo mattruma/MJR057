@@ -1,4 +1,4 @@
-using ClassLibrary1;
+using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;

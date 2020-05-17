@@ -1,4 +1,4 @@
-using ClassLibrary1;
+using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
