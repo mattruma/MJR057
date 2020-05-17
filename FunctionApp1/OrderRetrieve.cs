@@ -1,3 +1,4 @@
+using ClassLibrary1.Data;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,13 +41,16 @@ namespace FunctionApp1
                     "orders");
 
             var ordersCosmosItemResponse =
-                await ordersCosmosContainer.ReadItemAsync<OrderRetrieveData>(
+                await ordersCosmosContainer.ReadItemAsync<OrderData>(
                     orderIdParserResponse.Id,
                     new PartitionKey(orderIdParserResponse.LocationIdAndDate));
 
+            var orderData =
+                ordersCosmosItemResponse.Resource;
+
             var orderRetrieveResponse =
                 new OrderRetrieveResponse(
-                    ordersCosmosItemResponse.Resource);
+                    orderData);
 
             return new OkObjectResult(orderRetrieveResponse);
         }

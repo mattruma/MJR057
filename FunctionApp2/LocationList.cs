@@ -1,3 +1,4 @@
+using ClassLibrary1.Domain;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -39,9 +40,9 @@ namespace FunctionApp2
                     Environment.GetEnvironmentVariable("COSMOSDB_DATABASEID"),
                     "locations");
 
-            IQueryable<LocationListData> locationQuery =
+            IQueryable<LocationData> locationQuery =
                 locationCosmosContainer
-                    .GetItemLinqQueryable<LocationListData>()
+                    .GetItemLinqQueryable<LocationData>()
                     .OrderBy(x => x.Name);
 
             locationQuery = locationQuery
@@ -51,22 +52,22 @@ namespace FunctionApp2
             var locationFeedIterator =
                 locationQuery.ToFeedIterator();
 
-            var locationListDataList =
-                new List<LocationListData>();
+            var locationDataList =
+                new List<LocationData>();
 
             while (locationFeedIterator.HasMoreResults)
             {
                 var locationFeedResponse =
                     await locationFeedIterator.ReadNextAsync();
 
-                locationListDataList.AddRange(
+                locationDataList.AddRange(
                     locationFeedResponse.Resource);
             }
 
             var locationListResponse =
                 new LocationListResponse(
                     paginationOptions,
-                    locationListDataList);
+                    locationDataList.Select(x => new Location(x)));
 
             return new OkObjectResult(locationListResponse);
         }

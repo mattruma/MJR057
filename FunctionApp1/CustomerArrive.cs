@@ -1,3 +1,4 @@
+using ClassLibrary1.Data;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -32,7 +33,7 @@ namespace FunctionApp1
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")]
-                IAsyncCollector<CustomerArriveData> customerArriveDataCollector,
+                IAsyncCollector<OrderData> orderDataCollector,
             [TwilioSms(
                 AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
                 AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
@@ -50,44 +51,45 @@ namespace FunctionApp1
                     "orders");
 
             var ordersCosmosItemResponse =
-                await ordersCosmosContainer.ReadItemAsync<CustomerArriveData>(
+                await ordersCosmosContainer.ReadItemAsync<OrderData>(
                     orderIdParserResponse.Id,
                     new PartitionKey(orderIdParserResponse.LocationIdAndDate));
 
-            var customerArriveData =
+            var orderData =
                 ordersCosmosItemResponse.Resource;
+
+            if (orderData.DeliveredAt != null)
+            {
+                return new BadRequestObjectResult("Order has already been delivered.");
+            }
 
             var createMessageOptions =
                 new CreateMessageOptions(
-                    new PhoneNumber(customerArriveData.CustomerPhoneNumber));
+                    new PhoneNumber(orderData.CustomerPhoneNumber));
 
             if (customerArriveRequest.HasArrived)
             {
-                customerArriveData.ArrivedAt = DateTime.UtcNow;
+                orderData.ArrivedAt = DateTime.UtcNow;
 
                 createMessageOptions.Body = Environment.GetEnvironmentVariable("CUSTOMERARRIVE_TEMPLATE_1");
             }
             else
             {
-                customerArriveData.ArrivedAt = null;
+                orderData.ArrivedAt = null;
 
                 createMessageOptions.Body = Environment.GetEnvironmentVariable("CUSTOMERARRIVE_TEMPLATE_2");
             }
 
-            await customerArriveDataCollector.AddAsync(customerArriveData);
+            await orderDataCollector.AddAsync(orderData);
 
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", customerArriveData.CustomerName);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", customerArriveData.CustomerPhoneNumber);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtDate}}", customerArriveData.ReadyAt.ToShortDateString());
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtTime}}", customerArriveData.ReadyAt.ToShortTimeString());
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", customerArriveData.Id);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", customerArriveData.OrderId);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", orderData.CustomerName);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", orderData.Id);
 
             await createMessageOptionsCollector.AddAsync(createMessageOptions);
 
             var customerArriveResponse =
                 new CustomerArriveResponse(
-                    customerArriveData);
+                    orderData);
 
             return new OkObjectResult(customerArriveResponse);
         }

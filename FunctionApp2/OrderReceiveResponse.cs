@@ -1,4 +1,5 @@
-﻿using System;
+﻿using ClassLibrary1.Data;
+using System;
 
 namespace FunctionApp2
 {
@@ -23,15 +24,15 @@ namespace FunctionApp2
         }
 
         public OrderReceiveResponse(
-            OrderReceiveData orderReceiveData)
+            OrderData orderData)
         {
-            this.Id = orderReceiveData.Id;
-            this.Date = orderReceiveData.Date;
-            this.CustomerName = orderReceiveData.CustomerName;
-            this.CustomerPhoneNumber = orderReceiveData.CustomerPhoneNumber;
-            this.LocationId = orderReceiveData.LocationId;
-            this.ReadyAt = orderReceiveData.ReadyAt;
-            this.CreatedOn = orderReceiveData.CreatedOn;
+            this.Id = orderData.Id;
+            this.Date = orderData.Date;
+            this.CustomerName = orderData.CustomerName;
+            this.CustomerPhoneNumber = orderData.CustomerPhoneNumber;
+            this.LocationId = orderData.LocationId;
+            this.ReadyAt = orderData.ReadyAt;
+            this.CreatedOn = orderData.CreatedOn;
         }
     }
 }

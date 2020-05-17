@@ -1,3 +1,4 @@
+using ClassLibrary1.Data;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
@@ -32,7 +33,7 @@ namespace FunctionApp2
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
                 ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")]
-                IAsyncCollector<OrderDeliverData> orderDeliverDataCollector,
+                IAsyncCollector<OrderData> orderDataCollector,
             [TwilioSms(
                 AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
                 AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
@@ -50,42 +51,40 @@ namespace FunctionApp2
                     "orders");
 
             var ordersCosmosItemResponse =
-                await ordersCosmosContainer.ReadItemAsync<OrderDeliverData>(
+                await ordersCosmosContainer.ReadItemAsync<OrderData>(
                     orderIdParserResponse.Id,
                     new PartitionKey(orderIdParserResponse.LocationIdAndDate));
 
-            var orderDeliverData =
+            var orderData =
                 ordersCosmosItemResponse.Resource;
 
             var createMessageOptions =
                 new CreateMessageOptions(
-                    new PhoneNumber(orderDeliverData.CustomerPhoneNumber));
+                    new PhoneNumber(orderData.CustomerPhoneNumber));
 
             if (orderDeliverRequest.HasDelivered)
             {
-                orderDeliverData.DeliveredAt = DateTime.UtcNow;
+                orderData.DeliveredAt = DateTime.UtcNow;
 
                 createMessageOptions.Body = Environment.GetEnvironmentVariable("ORDERDELIVER_TEMPLATE");
 
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", orderDeliverData.CustomerName);
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", orderDeliverData.CustomerPhoneNumber);
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{DeliveredAtDate}}", orderDeliverData.DeliveredAt.Value.ToShortDateString());
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{DeliveredAtTime}}", orderDeliverData.DeliveredAt.Value.ToShortTimeString());
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", orderDeliverData.Id);
-                createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", orderDeliverData.OrderId);
+                createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", orderData.CustomerName);
+                createMessageOptions.Body = createMessageOptions.Body.Replace("{{DeliveredAtDate}}", orderData.DeliveredAt.Value.ToShortDateString());
+                createMessageOptions.Body = createMessageOptions.Body.Replace("{{DeliveredAtTime}}", orderData.DeliveredAt.Value.ToShortTimeString());
+                createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", orderData.Id);
 
                 await createMessageOptionsCollector.AddAsync(createMessageOptions);
             }
             else
             {
-                orderDeliverData.DeliveredAt = null;
+                orderData.DeliveredAt = null;
             }
 
-            await orderDeliverDataCollector.AddAsync(orderDeliverData);
+            await orderDataCollector.AddAsync(orderData);
 
             var orderDeliverResponse =
                 new OrderDeliverResponse(
-                    orderDeliverData);
+                    orderData);
 
             return new OkObjectResult(orderDeliverResponse);
         }

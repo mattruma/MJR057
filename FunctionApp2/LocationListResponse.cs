@@ -1,4 +1,5 @@
-﻿using ClassLibrary1.Helpers;
+﻿using ClassLibrary1.Domain;
+using ClassLibrary1.Helpers;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -12,7 +13,7 @@ namespace FunctionApp2
 
         public bool HasMoreResults { get; internal set; }
 
-        public IEnumerable<LocationListData> Results { get; internal set; }
+        public IEnumerable<Location> Results { get; internal set; }
 
         public LocationListResponse()
         {
@@ -20,12 +21,12 @@ namespace FunctionApp2
 
         public LocationListResponse(
             PaginationOptions paginationOptions,
-            IEnumerable<LocationListData> locationListDataList)
+            IEnumerable<Location> locationList)
         {
             this.Page = paginationOptions.Page;
             this.PageSize = paginationOptions.PageSize;
-            this.Results = locationListDataList.Take(paginationOptions.PageSize);
-            this.HasMoreResults = locationListDataList.Count() > this.PageSize;
+            this.Results = locationList.Take(paginationOptions.PageSize);
+            this.HasMoreResults = locationList.Count() > this.PageSize;
         }
     }
 }

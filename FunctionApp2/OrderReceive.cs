@@ -1,3 +1,4 @@
+using ClassLibrary1.Data;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
@@ -26,7 +27,7 @@ namespace FunctionApp2
             [CosmosDB(
                 databaseName: "%COSMOSDB_DATABASEID%",
                 collectionName: "orders",
-                ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")] IAsyncCollector<OrderReceiveData> orderReceiveDataCollector,
+                ConnectionStringSetting = "COSMOSDB_CONNECTIONSTRING")] IAsyncCollector<OrderData> orderReceiveDataCollector,
             [TwilioSms(
                 AccountSidSetting = "TWILIO_ACCOUNTSIDSETTING",
                 AuthTokenSetting = "TWILIO_AUTHTOKENSETTING",
@@ -41,8 +42,8 @@ namespace FunctionApp2
                     orderReceiveRequest.LocationId,
                     orderReceiveRequest.Date);
 
-            var orderReceiveData =
-                new OrderReceiveData
+            var orderData =
+                new OrderData
                 {
                     Id = orderIdBuilderResponse.Id,
                     Date = orderReceiveRequest.Date,
@@ -54,28 +55,25 @@ namespace FunctionApp2
                     ReadyAt = orderReceiveRequest.ReadyAt
                 };
 
-            await orderReceiveDataCollector.AddAsync(orderReceiveData);
+            await orderReceiveDataCollector.AddAsync(orderData);
 
             var createMessageOptions =
                 new CreateMessageOptions(
-                    new PhoneNumber(orderReceiveData.CustomerPhoneNumber))
+                    new PhoneNumber(orderData.CustomerPhoneNumber))
                 {
                     Body = Environment.GetEnvironmentVariable("ORDERRECEIVED_TEMPLATE")
                 };
 
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", orderReceiveData.CustomerName);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerPhoneNumber}}", orderReceiveData.CustomerPhoneNumber);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtDate}}", orderReceiveData.ReadyAt.ToShortDateString());
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtTime}}", orderReceiveData.ReadyAt.ToShortTimeString());
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", orderReceiveData.Id);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{OrderId}}", orderReceiveData.OrderId);
-            createMessageOptions.Body = createMessageOptions.Body.Replace("{{LocationId}}", orderReceiveData.LocationId);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{CustomerName}}", orderData.CustomerName);
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtDate}}", orderData.ReadyAt.ToShortDateString());
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{ReadyAtTime}}", orderData.ReadyAt.ToShortTimeString());
+            createMessageOptions.Body = createMessageOptions.Body.Replace("{{Id}}", orderData.Id);
 
             createMessageOptionsCollector.Add(createMessageOptions);
 
             var orderReceiveResponse =
                 new OrderReceiveResponse(
-                    orderReceiveData);
+                    orderData);
 
             return new CreatedResult("", orderReceiveResponse);
         }

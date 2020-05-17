@@ -7,6 +7,9 @@
     <Compile Remove="Function5.cs" />
     <Compile Remove="Function5Data.cs" />
     <Compile Remove="Function5Request.cs" />
+    <Compile Remove="LocationListData.cs" />
+    <Compile Remove="OrderListData.cs" />
+    <Compile Remove="OrderReceiveData.cs" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Azure.WebJobs.Extensions.CosmosDB" Version="3.0.7" />

@@ -1,3 +1,5 @@
+using ClassLibrary1.Data;
+using ClassLibrary1.Domain;
 using ClassLibrary1.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -40,9 +42,9 @@ namespace FunctionApp2
                     Environment.GetEnvironmentVariable("COSMOSDB_DATABASEID"),
                     "orders");
 
-            IQueryable<OrderListData> ordersQuery =
+            IQueryable<OrderData> ordersQuery =
                 ordersCosmosContainer
-                    .GetItemLinqQueryable<OrderListData>()
+                    .GetItemLinqQueryable<OrderData>()
                     .Where(x => x.LocationId == locationId);
 
             if (DateTime.TryParse(httpRequest.Query["date"], out DateTime date))
@@ -59,22 +61,22 @@ namespace FunctionApp2
             var ordersFeedIterator =
                 ordersQuery.ToFeedIterator();
 
-            var orderListDataList =
-                new List<OrderListData>();
+            var orderDataList =
+                new List<OrderData>();
 
             while (ordersFeedIterator.HasMoreResults)
             {
                 var orderFeedResponse =
                     await ordersFeedIterator.ReadNextAsync();
 
-                orderListDataList.AddRange(
+                orderDataList.AddRange(
                     orderFeedResponse.Resource);
             }
 
             var orderListResponse =
                 new OrderListResponse(
                     paginationOptions,
-                    orderListDataList);
+                    orderDataList.Select(x => new Order(x)));
 
             return new OkObjectResult(orderListResponse);
         }
