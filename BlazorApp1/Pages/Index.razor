@@ -27,8 +27,8 @@ else
     <p>At the store? Go ahead and let us know by clicking the "I am here" button and we will be out shortly!</p>
 }
 
-<button class="btn btn-primary" @onclick="OnButton1Clicked">I am here</button>
-<button class="btn btn-link" @onclick="OnButton2Clicked">I am not here</button>
+<button class="@this.GetButtonCssClass(!this.Order.HasArrived)" @onclick="@(async () => await OnArriveClick(true))">I am here</button>
+<button class="@this.GetButtonCssClass(this.Order.HasArrived)" @onclick="@(async () => await OnArriveClick(false))">I am not here</button>
 
 @code {
     [Parameter]
@@ -42,17 +42,22 @@ else
             await this.OrderService.GetByIdAsync(this.Id);
     }
 
-    private async Task OnButton1Clicked(
-        MouseEventArgs e)
+    protected async Task OnArriveClick(
+        bool hasArrived)
     {
         this.Order =
-            await this.OrderService.UpdateHasArrivedByIdAsync(this.Id, true);
+            await this.OrderService.ArriveAsync(this.Id, hasArrived);
     }
 
-    private async Task OnButton2Clicked(
-        MouseEventArgs e)
+    protected string GetButtonCssClass(
+        bool primary)
     {
-        this.Order =
-            await this.OrderService.UpdateHasArrivedByIdAsync(this.Id, false);
+
+        if (primary)
+        {
+            return "btn btn-primary";
+        }
+
+        return "btn btn-link";
     }
 }

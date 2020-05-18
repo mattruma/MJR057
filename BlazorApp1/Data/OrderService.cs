@@ -1,5 +1,6 @@
 ﻿using BlazorApp1.Helpers;
 using Newtonsoft.Json;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -19,7 +20,7 @@ namespace BlazorApp1.Data
             string id)
         {
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Get, $"api/orders/{id}");
+                new HttpRequestMessage(HttpMethod.Get, $"pickup/orders/{id}");
 
             var httpResponseMessage =
                 await _httpClient.SendAsync(httpRequestMessage);
@@ -32,12 +33,13 @@ namespace BlazorApp1.Data
             return order;
         }
 
-        public async Task<Order> UpdateHasArrivedByIdAsync(
+        [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "<Pending>")]
+        public async Task<Order> ArriveAsync(
             string id,
             bool hasArrived)
         {
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Put, $"api/orders/{id}");
+                new HttpRequestMessage(HttpMethod.Put, $"pickup/orders/{id}/arrive");
 
             httpRequestMessage.Content =
                 new StringContent(

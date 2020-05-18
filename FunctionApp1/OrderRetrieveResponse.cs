@@ -17,6 +17,8 @@ namespace FunctionApp1
 
         public DateTime ReadyAt { get; set; }
 
+        public DateTime? ArrivedAt { get; set; }
+
         public DateTime? DeliveredAt { get; set; }
 
         public DateTime CreatedOn { get; set; }
@@ -34,6 +36,7 @@ namespace FunctionApp1
             this.CustomerPhoneNumber = orderData.CustomerPhoneNumber;
             this.LocationId = orderData.LocationId;
             this.ReadyAt = orderData.ReadyAt;
+            this.ArrivedAt = orderData.ArrivedAt;
             this.DeliveredAt = orderData.DeliveredAt;
             this.CreatedOn = orderData.CreatedOn;
         }

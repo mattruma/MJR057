@@ -37,7 +37,7 @@
     <tbody>
         @foreach (var order in this.OrderList.Results.OrderByDescending(x => x.Priority))
         {
-            <tr class="@this.GetStatusClass(order)">
+            <tr class="@this.GetStatusCssClass(order)">
                 <td class="col-0 text-center">@order.Date.ToShortDateString()<br />@order.Date.ToShortTimeString()</td>
                 <td class="col-0 text-center">@order.Status</td>
                 <td>@order.CustomerName</td>
@@ -122,7 +122,7 @@
         this.IsBusy = false;
     }
 
-    public string GetStatusClass(
+    public string GetStatusCssClass(
         Order order)
     {
         if (order.HasBeenDelivered) return "status-delivered";
