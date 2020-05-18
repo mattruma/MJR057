@@ -1,12 +1,13 @@
 ﻿@page "/locations/{locationId}/orders"
 
 @using System.Linq
-@using System.Timers
+@using Microsoft.Extensions.Configuration;
 @using BlazorApp2.Data
 @using BlazorApp2.Helpers
 
 @inject NavigationManager NavigationManager
 @inject OrderService OrderService
+@inject IConfiguration Configuration
 
 <h1>Orders</h1>
 
@@ -26,6 +27,8 @@
     <thead>
         <tr>
             <th class="text-center"><i class="fa fa-calendar"></i></th>
+            <th class="text-center">Id</th>
+            <th class="text-center"></th>
             <th class="text-center">Status</th>
             <th>Customer</th>
             <th class="text-center"><i class="fa fa-phone"></i></th>
@@ -39,6 +42,8 @@
         {
             <tr class="@this.GetStatusCssClass(order)">
                 <td class="col-0 text-center">@order.Date.ToShortDateString()<br />@order.Date.ToShortTimeString()</td>
+                <td class="col-0 text-center">@order.OrderId</td>
+                <td><a href="@Configuration["PICKUP_ENDPOINT"]/@order.Id" target="_blank"><i class="fa fa-external-link"></i></a></td>
                 <td class="col-0 text-center">@order.Status</td>
                 <td>@order.CustomerName</td>
                 <td class="col-0 text-center">@order.CustomerPhoneNumber</td>
