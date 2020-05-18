@@ -1,5 +1,5 @@
 ﻿using BlazorApp2.Helpers;
-using System.Collections.Generic;
+using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -15,11 +15,23 @@ namespace BlazorApp2.Data
             _httpClient = httpClientFactory.CreateClient("api");
         }
 
-        public async Task<IEnumerable<Order>> ListAsync(
-            string locationId)
+        public async Task<PagedResponse<Order>> ListAsync(
+            string locationId,
+            DateTime? date = null)
         {
+            var requestUri =
+                $"deliver/locations/{locationId}/orders";
+
+            if (!date.HasValue)
+            {
+                date = DateTime.UtcNow;
+            }
+
+            requestUri += $"?date={date.Value:d}";
+            requestUri += $"&pageSize=99999999";
+
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Get, $"locations/{locationId}/orders");
+                new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             var httpResponseMessage =
                 await _httpClient.SendAsync(httpRequestMessage);
@@ -27,7 +39,7 @@ namespace BlazorApp2.Data
             httpResponseMessage.EnsureSuccessStatusCode();
 
             var orders =
-                await httpResponseMessage.Content.ReadAsJsonAsync<IEnumerable<Order>>();
+                await httpResponseMessage.Content.ReadAsJsonAsync<PagedResponse<Order>>();
 
             return orders;
         }

@@ -6,11 +6,37 @@ namespace BlazorApp2.Data
     {
         public string Id { get; set; }
 
+        public DateTime Date { get; set; }
+
         public string CustomerName { get; set; }
 
         public string CustomerPhoneNumber { get; set; }
 
         public string LocationId { get; set; }
+
+        public string Status
+        {
+            get
+            {
+                if (this.HasBeenDelivered) return "Delivered";
+
+                if (this.HasArrived) return "Arrived";
+
+                return "Open";
+            }
+        }
+
+        public int Priority
+        {
+            get
+            {
+                if (this.HasBeenDelivered) return 1;
+
+                if (this.HasArrived) return 3;
+
+                return 2;
+            }
+        }
 
         public DateTime ReadyAt { get; set; }
 

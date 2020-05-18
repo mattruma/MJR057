@@ -16,8 +16,11 @@ namespace BlazorApp2.Data
 
         public async Task<PagedResponse<Location>> ListAsync()
         {
+            var requestUri =
+                $"deliver/locations";
+
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Get, $"deliver/locations");
+                new HttpRequestMessage(HttpMethod.Get, requestUri);
 
             var httpResponseMessage =
                 await _httpClient.SendAsync(httpRequestMessage);

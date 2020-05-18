@@ -1,12 +1,7 @@
 h1 {
     font-size: 150%;
+    margin-bottom: 2rem;
 }
-
-    h1 + table,
-    h1 + ul,
-    ul + table {
-        margin-top: 2rem;
-    }
 
 .table td {
     vertical-align: middle;
@@ -16,6 +11,12 @@ h1 {
         width: 1px;
         white-space: nowrap;
     }
+
+i + span,
+span + i {
+    margin-left: 1rem;
+}
+
 
 #blazor-error-ui {
     background: lightyellow;
@@ -35,3 +36,13 @@ h1 {
         right: 0.75rem;
         top: 0.5rem;
     }
+
+.status-arrived {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.status-delivered {
+    color: #007bff;
+    opacity: 0.5;
+}

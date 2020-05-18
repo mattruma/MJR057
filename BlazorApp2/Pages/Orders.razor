@@ -1,6 +1,9 @@
 ﻿@page "/locations/{locationId}/orders"
 
+@using System.Linq
+@using System.Timers
 @using BlazorApp2.Data
+@using BlazorApp2.Helpers
 
 @inject NavigationManager NavigationManager
 @inject OrderService OrderService
@@ -13,40 +16,54 @@
     return;
 }
 
-<ul class="nav nav-pills justify-content-center">
-    <li class="nav-item">
-        <a class="nav-link active" href="#">Open</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="#">Recently Delivered</a>
-    </li>
-</ul>
+<div class="row mb-4">
+    <div class="col-4 text-left"><a href="#" @onclick="@OnPreviousDateClick" @onclick:preventDefault><i class="fa fa-long-arrow-left"></i><span>@this.PreviousDate.ToShortDateString()</span></a></div>
+    <div class="col-4 text-center">@this.Date.ToShortDateString()</div>
+    <div class="col-4 text-right"><a href="#" @onclick="@OnNextDateClick" @onclick:preventDefault><span>@this.NextDate.ToShortDateString()</span><i class="fa fa-long-arrow-right"></i></a></div>
+</div>
 
 <table class="table">
     <thead>
         <tr>
-            <th></th>
             <th class="text-center"><i class="fa fa-calendar"></i></th>
+            <th class="text-center">Status</th>
             <th>Customer</th>
             <th class="text-center"><i class="fa fa-phone"></i></th>
             <th class="text-center">Arrived</th>
             <th class="text-center">Delivered</th>
+            <th class="text-center">Action</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var order in this.OrderList.OrderByDescending(x => x.CreatedOn))
+        @foreach (var order in this.OrderList.Results.OrderByDescending(x => x.Priority))
         {
-            <tr>
-                <td class="col-0"><a href="@order.LocationId" class="btn btn-outline-primary">Deliver</a></td>
-                <td class="col-0 text-center">@order.CreatedOn</td>
+            <tr class="@this.GetStatusClass(order)">
+                <td class="col-0 text-center">@order.Date.ToShortDateString()<br />@order.Date.ToShortTimeString()</td>
+                <td class="col-0 text-center">@order.Status</td>
                 <td>@order.CustomerName</td>
                 <td class="col-0 text-center">@order.CustomerPhoneNumber</td>
-                <td class="col-0 text-center">@order.ArrivedAt</td>
-                <td class="col-0 text-center">@order.DeliveredAt</td>
+                <td class="col-0 text-center">
+                    @if (order.ArrivedAt.HasValue)
+                    {
+                        @order.ArrivedAt.Value.ToShortDateString()<br />@order.ArrivedAt.Value.ToShortTimeString()
+                    }
+                </td>
+                <td class="col-0 text-center">
+                    @if (order.DeliveredAt.HasValue)
+                    {
+                        @order.DeliveredAt.Value.ToShortDateString()<br />@order.DeliveredAt.Value.ToShortTimeString()
+                    }
+                </td>
+                <td class="col-0"><a href="#" @onclick="@OnDeliverClick" @onclick:preventDefault class="btn btn-link">Deliver</a></td>
             </tr>
         }
     </tbody>
 </table>
+
+@if (this.OrderList.Results.Count() == 0)
+{
+    <p>No orders were found.</p>
+}
 
 @code {
     [Parameter]
@@ -54,16 +71,60 @@
 
     public bool IsBusy { get; set; }
 
-    public IEnumerable<Order> OrderList { get; set; }
+    public PagedResponse<Order> OrderList { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    public DateTime Date { get; set; }
+
+    public DateTime PreviousDate => this.Date.AddDays(-1);
+    public DateTime NextDate => this.Date.AddDays(1);
+
+    protected override void OnInitialized()
+    {
+        this.Date = this.NavigationManager.GetQueryStringValue<DateTime>(
+            "date", DateTime.UtcNow);
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await this.GetOrdersAsync(this.Date);
+    }
+
+    public async Task OnPreviousDateClick()
+    {
+        await this.GetOrdersAsync(this.PreviousDate);
+    }
+
+    public async Task OnNextDateClick()
+    {
+        await this.GetOrdersAsync(this.NextDate);
+    }
+
+    public async Task OnDeliverClick()
+    {
+    }
+
+    public async Task GetOrdersAsync(
+        DateTime date)
     {
         this.IsBusy = true;
 
+        this.Date = date;
+
         this.OrderList =
             await this.OrderService.ListAsync(
-                this.LocationId);
+                this.LocationId,
+                this.Date);
 
         this.IsBusy = false;
+    }
+
+    public string GetStatusClass(
+        Order order)
+    {
+        if (order.HasBeenDelivered) return "status-delivered";
+
+        if (order.HasArrived) return "status-arrived";
+
+        return "status-open";
     }
 }
