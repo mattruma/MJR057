@@ -1,36 +1,43 @@
 ﻿@page "/"
 
 @using BlazorApp2.Data
+@using BlazorApp2.Helpers
 
 @inject NavigationManager NavigationManager
 @inject LocationService LocationService
 
 <h1>Locations</h1>
 
-<p>Select a location to see orders.</p>
+<p>Select a location to see orders for the current date, you can navigate through earlier dates once the orders are displayed.</p>
 
 @if (this.IsBusy)
 {
     <p>Loading...</p>
     return;
 }
+
 <table class="table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th class="text-center">Action</th>
+        </tr>
+    </thead>
     <tbody>
-        @foreach (var location in this.Locations)
+        @foreach (var location in this.Locations.Results)
         {
             <tr>
-                <td class="col-0"><a href="locations/@location.LocationId/orders" class="btn btn-outline-primary">Select</a></td>
                 <td>@location.Name</td>
+                <td class="col-0 text-center"><a href="locations/@location.Id/orders?date=@DateTime.UtcNow.Date" class="btn btn-link">Select</a></td>
             </tr>
         }
     </tbody>
 </table>
 
 @code {
-
     public bool IsBusy { get; set; }
 
-    public IEnumerable<Location> Locations { get; set; }
+    public PagedResponse<Location> Locations { get; set; }
 
     protected override async Task OnInitializedAsync()
     {

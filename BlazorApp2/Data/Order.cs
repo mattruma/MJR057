@@ -4,13 +4,15 @@ namespace BlazorApp2.Data
 {
     public class Order
     {
-        public string OrderId { get; set; }
+        public string Id { get; set; }
 
         public string CustomerName { get; set; }
 
         public string CustomerPhoneNumber { get; set; }
 
         public string LocationId { get; set; }
+
+        public DateTime ReadyAt { get; set; }
 
         public DateTime? ArrivedAt { get; set; }
 

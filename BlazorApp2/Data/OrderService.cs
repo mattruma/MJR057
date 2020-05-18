@@ -19,7 +19,7 @@ namespace BlazorApp2.Data
             string locationId)
         {
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Get, $"api/locations/{locationId}/orders");
+                new HttpRequestMessage(HttpMethod.Get, $"locations/{locationId}/orders");
 
             var httpResponseMessage =
                 await _httpClient.SendAsync(httpRequestMessage);

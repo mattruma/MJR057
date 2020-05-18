@@ -1,5 +1,4 @@
 ﻿using BlazorApp2.Helpers;
-using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -15,20 +14,20 @@ namespace BlazorApp2.Data
             _httpClient = httpClientFactory.CreateClient("api");
         }
 
-        public async Task<IEnumerable<Location>> ListAsync()
+        public async Task<PagedResponse<Location>> ListAsync()
         {
             var httpRequestMessage =
-                new HttpRequestMessage(HttpMethod.Get, $"api/locations");
+                new HttpRequestMessage(HttpMethod.Get, $"deliver/locations");
 
             var httpResponseMessage =
                 await _httpClient.SendAsync(httpRequestMessage);
 
             httpResponseMessage.EnsureSuccessStatusCode();
 
-            var orders =
-                await httpResponseMessage.Content.ReadAsJsonAsync<IEnumerable<Location>>();
+            var locations =
+                await httpResponseMessage.Content.ReadAsJsonAsync<PagedResponse<Location>>();
 
-            return orders;
+            return locations;
         }
     }
 }
