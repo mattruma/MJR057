@@ -54,7 +54,7 @@
                         @order.DeliveredAt.Value.ToShortDateString()<br />@order.DeliveredAt.Value.ToShortTimeString()
                     }
                 </td>
-                <td class="col-0"><a href="#" @onclick="@OnDeliverClick" @onclick:preventDefault class="btn btn-link">Deliver</a></td>
+                <td class="col-0"><a href="#" @onclick="@(async () => await OnDeliverClick(order))" @onclick:preventDefault class="btn btn-link">Deliver</a></td>
             </tr>
         }
     </tbody>
@@ -99,8 +99,12 @@
         await this.GetOrdersAsync(this.NextDate);
     }
 
-    public async Task OnDeliverClick()
+    public async Task OnDeliverClick(
+        Order order)
     {
+        order.DeliveredAt = DateTime.UtcNow;
+
+        await this.OrderService.DeliverAsync(order.Id, true);
     }
 
     public async Task GetOrdersAsync(

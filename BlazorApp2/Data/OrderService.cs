@@ -1,5 +1,7 @@
 ﻿using BlazorApp2.Helpers;
+using Newtonsoft.Json;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -42,6 +44,29 @@ namespace BlazorApp2.Data
                 await httpResponseMessage.Content.ReadAsJsonAsync<PagedResponse<Order>>();
 
             return orders;
+        }
+
+        [SuppressMessage("Style", "IDE0017:Simplify object initialization", Justification = "<Pending>")]
+        public async Task<Order> DeliverAsync(
+            string id,
+            bool hasDelivered)
+        {
+            var httpRequestMessage =
+                new HttpRequestMessage(HttpMethod.Put, $"deliver/orders/{id}/deliver");
+
+            httpRequestMessage.Content =
+                new StringContent(
+                    JsonConvert.SerializeObject(new { HasDelivered = hasDelivered }));
+
+            var httpResponseMessage =
+                await _httpClient.SendAsync(httpRequestMessage);
+
+            httpResponseMessage.EnsureSuccessStatusCode();
+
+            var order =
+                await httpResponseMessage.Content.ReadAsJsonAsync<Order>();
+
+            return order;
         }
     }
 }
